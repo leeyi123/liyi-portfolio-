@@ -60,12 +60,15 @@ html,body{
   display:flex;
   align-items:center;
   gap:0;
-  overflow:hidden;
+  overflow-x:auto;
+  scrollbar-width:none;
 }
+#info::-webkit-scrollbar{display:none;}
 .info-block{
   padding:1.1rem 2rem;
   border-right:1px solid rgba(27,22,20,.08);
   flex-shrink:0;
+  max-width:360px;
 }
 .info-block:last-child{border-right:none;}
 .info-label{
@@ -75,6 +78,10 @@ html,body{
 .info-val{
   font-size:.72rem;letter-spacing:.06em;
   color:var(--ink-soft);display:block;
+}
+.info-note{
+  max-width:320px;
+  line-height:1.6;
 }
 .info-val.serif{
   font-family:'Cormorant Garamond',serif;
@@ -165,8 +172,16 @@ html,body{
       <span class="info-val">2024</span>
     </div>
     <div class="info-block">
-      <span class="info-label">Category</span>
-      <span class="info-val">3D Digital Exhibition</span>
+      <span class="info-label">Role</span>
+      <span class="info-val">Curatorial UX · 3D Exhibition Design</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Experience Focus</span>
+      <span class="info-val info-note">以王维诗作与盛唐丝路为叙事线索，构建五个主题展厅、观展动线与沉浸式空间节奏。</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">AI Workflow</span>
+      <span class="info-val info-note">使用AI辅助历史材料梳理、展厅叙事结构、关键词Prompt、视觉意向与空间原型推演。</span>
     </div>
   </div>
 </div>
