@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>西泠网拍 UI — LILLY</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+a,button{outline:none;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --paper:#EEECEA;
+  --paper-deep:#E8E5E2;
+  --ink:#1B1614;
+  --ink-soft:#3A2F2C;
+  --warm:#9C8E87;
+  --terracotta:#C5563B;
+  --rule:rgba(27,22,20,.1);
+}
+
+html,body{
+  width:100%;height:100%;
+  background:var(--paper);
+  color:var(--ink-soft);
+  font-family:'Raleway',sans-serif;
+  font-weight:200;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+
+/* ── HEADER ── */
+#header{
+  flex-shrink:0;
+  display:flex;align-items:stretch;
+  border-bottom:1px solid var(--rule);
+  background:var(--paper);
+  z-index:100;
+  position:relative;
+}
+#back{
+  display:flex;align-items:center;gap:.55rem;
+  padding:0 2rem;
+  font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(27,22,20,.35);text-decoration:none;
+  border-right:1px solid var(--rule);flex-shrink:0;
+  transition:color .25s;
+}
+#back:hover{color:var(--terracotta)}
+#back svg{fill:none;stroke:currentColor;stroke-width:1.2}
+#info{flex:1;display:flex;align-items:center;overflow:hidden}
+.info-block{
+  padding:1.1rem 2rem;
+  border-right:1px solid rgba(27,22,20,.06);
+  flex-shrink:0;
+}
+.info-block:last-child{border-right:none}
+.info-label{
+  font-size:.48rem;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--warm);display:block;margin-bottom:.3rem;
+}
+.info-val{font-size:.72rem;letter-spacing:.06em;color:var(--ink-soft);display:block}
+.info-val.serif{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.95rem;font-weight:300;font-style:italic;color:var(--ink);
+}
+
+/* ── STAGE: floating cards ── */
+#stage{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Center blur overlay */
+#center{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:10;
+  pointer-events:none;
+  opacity:0;
+  animation:fadeIn 1s ease .6s forwards;
+}
+#center::before{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:1200px;height:1200px;
+  border-radius:50%;
+  background:radial-gradient(ellipse at center,
+    #EEECEA 0%,
+    #EEECEA 38%,
+    rgba(238,236,234,.85) 60%,
+    transparent 100%);
+  filter:blur(8px);
+  z-index:-1;
+}
+@keyframes fadeIn{to{opacity:1}}
+
+.center-label{
+  font-size:.55rem;letter-spacing:.48em;text-transform:uppercase;
+  color:var(--warm);display:block;margin-bottom:1rem;
+}
+.center-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.2rem,4.5vw,4.2rem);
+  font-weight:300;font-style:italic;
+  color:var(--ink);line-height:1.1;
+  display:block;margin-bottom:.6rem;
+}
+.center-sub{
+  font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--warm);display:block;margin-bottom:2rem;
+}
+.center-cta{
+  display:inline-flex;align-items:center;gap:.6rem;
+  font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--terracotta);
+  border-bottom:1px solid rgba(197,86,59,.3);
+  padding-bottom:2px;
+  cursor:pointer;
+  pointer-events:all;
+  transition:border-color .25s;
+}
+.center-cta:hover{border-color:var(--terracotta)}
+
+/* floating card */
+.card{
+  position:absolute;
+  left:0;top:0;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:
+    0 4px 20px rgba(27,22,20,.08),
+    0 1px 4px rgba(27,22,20,.05);
+  cursor:pointer;
+  will-change:transform;
+  transition:box-shadow .3s ease;
+  background:var(--paper-deep);
+}
+.card:hover{
+  box-shadow:
+    0 10px 40px rgba(27,22,20,.15),
+    0 2px 8px rgba(27,22,20,.08);
+  z-index:20;
+}
+.card img{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+  pointer-events:none;
+  user-select:none;
+}
+
+/* placeholder card */
+.card-ph{
+  width:100%;height:100%;
+  background:linear-gradient(135deg,#EDE6D8 0%,#E4DBC8 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.card-ph-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.4rem;font-weight:300;font-style:italic;
+  color:rgba(27,22,20,.18);
+}
+
+/* lightbox */
+#lightbox{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(27,22,20,.85);
+  backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;
+  transition:opacity .4s ease,visibility .4s ease;
+}
+#lightbox.show{opacity:1;visibility:visible}
+#lightbox-img{
+  max-width:min(480px,85vw);
+  max-height:85vh;
+  object-fit:contain;
+  border-radius:20px;
+  box-shadow:0 32px 80px rgba(0,0,0,.4);
+  transform:scale(.92);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+}
+#lightbox.show #lightbox-img{transform:scale(1)}
+#lightbox-close{
+  position:absolute;top:2rem;right:2.5rem;
+  font-size:.55rem;letter-spacing:.36em;text-transform:uppercase;
+  color:rgba(244,239,230,.4);cursor:pointer;
+  background:none;border:none;
+  transition:color .2s;
+}
+#lightbox-close:hover{color:rgba(244,239,230,.9)}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <a id="back" href="#" onclick="history.back();return false;">
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M7 1L2 5l5 4M2 5h10"/>
+    </svg>
+    Back
+  </a>
+  <div id="info">
+    <div class="info-block">
+      <span class="info-label">Project</span>
+      <span class="info-val serif">西泠网拍 — 艺术品拍卖 App</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Year</span>
+      <span class="info-val">2026</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Platform</span>
+      <span class="info-val">iOS · Android</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Role</span>
+      <span class="info-val">UI Design · Design System</span>
+    </div>
+  </div>
+</div>
+
+<div id="stage">
+  <!-- Center info -->
+  <div id="center">
+    <span class="center-label">UI Design · 2026</span>
+    <span class="center-title">西泠网拍</span>
+    <span class="center-sub">Art Auction App · iOS & Android</span>
+    <span class="center-cta">Browse Screens ↓</span>
+  </div>
+  <!-- Cards injected by JS -->
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightbox-close">Close ×</button>
+  <img id="lightbox-img" src="" alt=""/>
+</div>
+
+<!-- Section 2 -->
+<div id="section2">
+  <div id="s2-bg"></div>
+  <div id="s2-layout">
+    <div id="s2-above">
+      <span id="s2-label"></span>
+      <h2 id="s2-heading"></h2>
+    </div>
+    <div id="s2-phone">
+      <div id="s2-viewport">
+        <!-- slides injected by JS -->
+      </div>
+    </div>
+    <div id="s2-below">
+      <p id="s2-desc"></p>
+      <div id="s2-dots"></div>
+    </div>
+  </div>
+</div>
+<button id="s2-back" onclick="hideSection2()">↑ Back</button>
+
+<!-- SECTION 3: Archive layout -->
+<div id="section3">
+  <!-- Left fixed sidebar -->
+  <div id="s3-sidebar">
+    <div id="s3-brand">
+      <p id="s3-title">西泠网拍</p>
+      <p id="s3-desc-short">艺术品拍卖 App，以东方审美为底层逻辑，将传统拍卖的仪式感转译为流畅的移动端体验。</p>
+      <span class="s3-learn-more">Learn More</span>
+    </div>
+    <nav id="s3-nav">
+      <div class="s3-nav-group">
+        <p class="s3-nav-label">Collection</p>
+        <a class="s3-nav-item active" href="#" onclick="switchView('featured');return false">Featured</a>
+        <a class="s3-nav-item" href="#" onclick="switchView('archive');return false">Archive <span class="s3-dot">•</span></a>
+      </div>
+      <div class="s3-nav-group">
+        <p class="s3-nav-label">Information</p>
+        <a class="s3-nav-item" href="#" onclick="hideSection3();return false">About</a>
+        <a class="s3-nav-item" href="#" onclick="hideSection3();return false">Contact</a>
+      </div>
+    </nav>
+    <div id="s3-sidebar-footer">
+      <span class="s3-social">𝕏</span>
+      <span class="s3-social">◎</span>
+    </div>
+  </div>
+
+  <!-- Right scrollable content -->
+  <div id="s3-content">
+
+    <!-- Featured view -->
+    <div id="s3-featured">
+      <!-- items injected by JS -->
+    </div>
+
+    <!-- Archive view -->
+    <div id="s3-archive" style="display:none">
+      <div id="s3-grid">
+        <!-- items injected by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────
+   SCREENS — 在这里填入你的截图路径
+   把 UI 截图放入 ../images/ui/ 文件夹
+   命名为 ui-01.jpg, ui-02.jpg ... 以此类推
+───────────────────────────────────── */
+const SCREENS = [
+  { src:'../images/ui/ui-01.jpg' },
+  { src:'../images/ui/ui-02.jpg' },
+  { src:'../images/ui/ui-03.jpg' },
+  { src:'../images/ui/ui-04.jpg' },
+  { src:'../images/ui/ui-05.jpg' },
+  { src:'../images/ui/ui-07.jpg' },
+  { src:'../images/ui/ui-08.jpg' },
+  { src:'../images/ui/ui-09.jpg' },
+  { src:'../images/ui/ui-010.jpg' },
+  { src:'../images/ui/ui-011.jpg' },
+  { src:'../images/ui/ui-012.jpg' },
+  { src:'../images/ui/ui-013.jpg' },
+  { src:'../images/ui/ui-014.jpg' },
+  { src:'../images/ui/ui-015.jpg' },
+  { src:'../images/ui/ui-016.jpg' },
+  { src:'../images/ui/ui-017.jpg' },
+  { src:'../images/ui/ui-018.jpg' },
+  { src:'../images/ui/ui-019.jpg' },
+  { src:'../images/ui/ui-020.jpg' },
+  { src:'../images/ui/ui-021.jpg' },
+  { src:'../images/ui/ui-022.jpg' },
+  { src:'../images/ui/ui-025.jpg' },
+  { src:'../images/ui/ui-026.jpg' },
+  { src:'../images/ui/ui-027.jpg' },
+  { src:'../images/ui/ui-028.jpg' },
+  { src:'../images/ui/ui-029.jpg' },
+  { src:'../images/ui/ui-030.jpg' },
+  { src:'../images/ui/ui-031.jpg' },
+  { src:'../images/ui/ui-032.jpg' },
+  { src:'../images/ui/ui-033.jpg' },
+  { src:'../images/ui/ui-034.jpg' },
+  { src:'../images/ui/ui-035.jpg' },
+  { src:'../images/ui/ui-036.jpg' },
+  { src:'../images/ui/ui-02.jpg' },
+  { src:'../images/ui/ui-038.jpg' },
+  { src:'../images/ui/ui-01.jpg' },
+];
+
+/* card base size — outermost orbit */
+const CARD_W_BASE = 72;
+const CARD_H_BASE = CARD_W_BASE * (4/3); // 3:4 portrait
+
+const stage = document.getElementById('stage');
+const cx = ()=> stage.offsetWidth / 2;
+const cy = ()=> stage.offsetHeight / 2;
+
+/* outer=large+slow, inner=small+fast */
+const ORBITS = [
+  { r: 0.38, count: 6,  speed: 0.00022, scale: 0.38 },
+  { r: 0.52, count: 12, speed: 0.00015, scale: 0.54 },
+  { r: 0.68, count: 18, speed: 0.00010, scale: 0.75 },
+  { r: 0.84, count: 24, speed: 0.00006, scale: 1.00 },
+];
+
+const TOTAL_SLOTS = ORBITS.reduce((s,o)=>s+o.count, 0);
+const FILLED = Array.from({length:TOTAL_SLOTS}, (_,i)=>SCREENS[i % SCREENS.length]);
+
+const cards = [];
+let startTime = null;
+let cumIdx = 0;
+
+ORBITS.forEach((orbit, oi)=>{
+  for(let j = 0; j < orbit.count; j++, cumIdx++){
+    const sc = FILLED[cumIdx];
+    const w = Math.round(CARD_W_BASE * orbit.scale);
+    const h = Math.round(CARD_H_BASE * orbit.scale);
+    const radius = Math.round(Math.min(6, 6 * orbit.scale));
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.width        = w + 'px';
+    card.style.height       = h + 'px';
+    card.style.left         = '0px';
+    card.style.top          = '0px';
+    card.style.borderRadius = radius + 'px';
+
+    const img = document.createElement('img');
+    img.src = sc.src;
+    img.alt = '';
+    img.onerror = ()=>{
+      img.style.display = 'none';
+      const ph = document.createElement('div');
+      ph.className = 'card-ph';
+      ph.innerHTML = `<span class="card-ph-num" style="font-size:${Math.max(8, 14*orbit.scale)}px">${String(cumIdx+1).padStart(2,'0')}</span>`;
+      card.appendChild(ph);
+    };
+    card.appendChild(img);
+    card.addEventListener('click', ()=> openLightbox(sc.src));
+    stage.appendChild(card);
+
+    const angleOffset = (2*Math.PI / orbit.count) * j;
+    const tilt = ((cumIdx % 7) - 3) * 4;
+    cards.push({ el:card, w, h, oi, angleOffset, speed:orbit.speed, tilt, r:0 });
+  }
+});
+
+function assignOrbits(){
+  const minDim = Math.min(stage.offsetWidth, stage.offsetHeight);
+  const minR = 420;
+  const step = (minDim * 0.84 - minR) / (ORBITS.length - 1);
+  cards.forEach(c=>{
+    c.r = minR + c.oi * step;
+  });
+}
+assignOrbits();
+window.addEventListener('resize', assignOrbits);
+
+function tick(ts){
+  if(!startTime) startTime = ts;
+  const elapsed = ts - startTime;
+  const ox = cx(), oy = cy();
+  cards.forEach(c=>{
+    const angle = c.angleOffset + elapsed * c.speed;
+    const x = ox + Math.cos(angle) * c.r - c.w/2;
+    const y = oy + Math.sin(angle) * c.r - c.h/2;
+    c.el.style.transform = `translate(${x}px,${y}px) rotate(${c.tilt}deg)`;
+  });
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+
+<style>
+/* ── SECTION 2 ── */
+#section2{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  z-index:50;
+  transform:translateY(100%);
+  transition:transform .9s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+  display:flex;align-items:center;justify-content:center;
+}
+#section2.visible{ transform:translateY(0); }
+
+/* full-screen bg color transition */
+#s2-bg{
+  position:absolute;inset:0;
+  transition:background-color .8s ease;
+}
+
+/* layout: column, centered */
+#s2-layout{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;
+  align-items:center;
+  gap:2rem;
+  padding:2rem;
+}
+
+/* text above phone */
+#s2-above{ text-align:center; }
+#s2-label{
+  display:block;
+  font-size:.55rem;letter-spacing:.44em;text-transform:uppercase;
+  margin-bottom:.7rem;
+  transition:color .5s ease;
+}
+#s2-heading{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.8rem,3.5vw,3.2rem);
+  font-weight:300;line-height:1.1;
+  transition:color .5s ease;
+}
+
+/* phone container — 3410:1408 ratio = ~2.42:1, scaled to fit */
+#s2-phone{
+  width:min(1100px, 90vw);
+  height:calc(min(1100px, 90vw) / 2.423);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.18), 0 4px 16px rgba(0,0,0,.1);
+  position:relative;
+  flex-shrink:0;
+  background:#fff;
+}
+
+/* viewport clips the sliding images */
+#s2-viewport{
+  position:absolute;inset:0;
+  overflow:hidden;
+}
+
+/* each slide inside phone */
+.s2-slide{
+  position:absolute;
+  inset:0;
+  transform:translateY(100%);
+  transition:none;
+}
+.s2-slide img{
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+}
+.s2-slide.current{
+  transform:translateY(0);
+  transition:transform .7s cubic-bezier(.4,0,.2,1);
+}
+.s2-slide.exit{
+  transform:translateY(-100%);
+  transition:transform .7s cubic-bezier(.4,0,.2,1);
+}
+
+/* text below phone */
+#s2-below{ text-align:center; }
+#s2-desc{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem;font-weight:300;line-height:1.7;
+  max-width:360px;
+  margin-bottom:1rem;
+  transition:color .5s ease;
+}
+#s2-dots{
+  display:flex;gap:.5rem;justify-content:center;
+}
+.s2-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:rgba(255,255,255,.3);
+  transition:background .3s,transform .3s;
+}
+.s2-dot.on{ background:#fff;transform:scale(1.5); }
+.s2-dot.dark{ background:rgba(27,22,20,.2); }
+.s2-dot.dark.on{ background:#1B1614; }
+
+/* back */
+#s2-back{
+  position:fixed;top:1.4rem;right:2rem;z-index:60;
+  font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;
+  cursor:pointer;background:none;border:none;
+  opacity:0;pointer-events:none;
+  transition:color .2s,opacity .3s;
+}
+#s2-back.show{ opacity:1;pointer-events:all; }
+
+/* ═══════════════════════════════
+   SECTION 3: Archive Layout
+═══════════════════════════════ */
+#section3{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  z-index:60;
+  display:flex;
+  background:#F2F0EE;
+  transform:translateY(100%);
+  transition:transform .9s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+#section3.visible{ transform:translateY(0); }
+
+/* sidebar — narrow, fixed */
+#s3-sidebar{
+  width:290px;
+  flex-shrink:0;
+  border-right:1px solid #DEDAD6;
+  padding:1.6rem 1.8rem 2rem;
+  display:flex;flex-direction:column;
+  background:#F2F0EE;
+  overflow-y:auto;
+  position:relative;
+}
+#s3-sidebar::-webkit-scrollbar{width:0}
+
+#s3-title{
+  font-size:.82rem;font-weight:400;
+  color:#1a1a1a;margin-bottom:.7rem;
+  font-family:'Raleway',sans-serif;
+  border-bottom:1px solid #DEDAD6;
+  padding-bottom:1rem;
+}
+#s3-desc-short{
+  font-size:.72rem;line-height:1.65;
+  color:#888;font-family:'Raleway',sans-serif;
+  font-weight:200;padding:.8rem 0;
+}
+.s3-learn-more{
+  font-size:.7rem;color:#666;text-decoration:underline;
+  font-family:'Raleway',sans-serif;font-weight:300;
+  cursor:pointer;display:block;margin-bottom:1.2rem;
+}
+
+#s3-nav{ display:flex;flex-direction:column;gap:.05rem; }
+.s3-nav-label{
+  font-size:.7rem;color:#1a1a1a;
+  font-family:'Raleway',sans-serif;font-weight:400;
+  margin:1rem 0 .15rem;
+}
+.s3-nav-item{
+  display:flex;align-items:center;gap:.3rem;
+  font-size:.72rem;color:#888;
+  text-decoration:none;padding:.12rem 0;
+  font-family:'Raleway',sans-serif;font-weight:300;
+  cursor:pointer;transition:color .15s;
+}
+.s3-nav-item:hover{color:#1a1a1a}
+.s3-nav-item.active{color:#1a1a1a}
+.s3-dot{font-size:.55rem;line-height:1}
+
+#s3-sidebar-footer{
+  margin-top:auto;padding-top:2rem;
+  display:flex;gap:1rem;align-items:center;
+}
+.s3-social{
+  font-size:.8rem;color:#bbb;cursor:pointer;
+  font-family:'Raleway',sans-serif;
+  transition:color .2s;
+}
+.s3-social:hover{color:#555}
+
+/* right content */
+#s3-content{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+#s3-content::-webkit-scrollbar{width:0}
+
+/* featured */
+.s3-feat-item{
+  padding:3rem 3.5rem 0;
+  border-bottom:1px solid #DEDAD6;
+}
+.s3-feat-img{ max-width:800px;margin:0 auto; }
+.s3-feat-img img{ width:100%;height:auto;display:block; }
+.s3-feat-meta{
+  display:grid;
+  grid-template-columns:100px 1fr 100px 1fr;
+  max-width:800px;
+  margin:2rem auto 3rem;
+  gap:.3rem .8rem;
+  align-items:baseline;
+}
+.s3-meta-key{
+  font-size:.68rem;color:#999;
+  font-family:'Raleway',sans-serif;font-weight:300;
+}
+.s3-meta-val{
+  font-size:.68rem;color:#1a1a1a;
+  font-family:'Raleway',sans-serif;font-weight:300;
+}
+
+/* archive grid — exact reference */
+#s3-archive{ padding:0; }
+#s3-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  /* col gap matches sidebar border; row gap = generous */
+  gap:3.5rem 0;
+  align-items:start;
+  /* grid starts right at the left edge of content area */
+  padding:1.8rem 0 5rem;
+}
+.s3-grid-item{
+  cursor:pointer;
+  padding:0 2rem;
+  border-right:1px solid #DEDAD6;
+}
+.s3-grid-item:last-child{ border-right:none; }
+.s3-grid-item:nth-child(4n){ border-right:none; }
+.s3-grid-img{ width:100%;line-height:0; }
+.s3-grid-img img{
+  width:100%;height:auto;display:block;
+  transition:opacity .3s;
+}
+.s3-grid-item:hover .s3-grid-img img{ opacity:.72; }
+.s3-grid-caption{
+  font-size:.6rem;color:#bbb;
+  font-family:'Raleway',sans-serif;font-weight:300;
+  margin-top:.5rem;letter-spacing:.02em;
+}
+
+@media(max-width:960px){
+  #s3-sidebar{width:200px}
+  #s3-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+
+<script>
+function openLightbox(src){
+  const lb=document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src=src;
+  lb.classList.add('show');
+}
+function closeLightbox(){
+  document.getElementById('lightbox').classList.remove('show');
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeLightbox(); hideSection2(); }
+});
+
+/* ── SECTION 2: phone slider ── */
+const SLIDES = [
+  {
+    bg:'#F0EAD8', textColor:'#1B1614',
+    screen:'../images/ui-feature/screen-01.jpg',
+    label:'AI 智能推荐',
+    heading:'为你找到\n值得等待的拍品',
+    desc:'基于收藏偏好与历史行为，精准匹配每一件值得关注的拍品。',
+  },
+  {
+    bg:'#99ABA6', textColor:'#fff',
+    screen:'../images/ui-feature/screen-02.jpg',
+    label:'实时竞拍',
+    heading:'每一口价\n都是与历史的对话',
+    desc:'流畅的出价体验，实时竞拍数据，让每次举牌都充满仪式感。',
+  },
+  {
+    bg:'#D2BF81', textColor:'#1B1614',
+    screen:'../images/ui-feature/screen-03.jpg',
+    label:'藏品管理',
+    heading:'记录你的\n收藏故事',
+    desc:'完整追踪藏品来源、估值与流转，构建属于你的数字藏品档案。',
+  },
+  {
+    bg:'#6F6C43', textColor:'#fff',
+    screen:'../images/ui-feature/screen-04.jpg',
+    label:'拍品详情',
+    heading:'每件作品\n都有自己的温度',
+    desc:'高清图录、专家品评、拍卖历史——一件拍品的完整生命轨迹。',
+  },
+];
+
+const viewport = document.getElementById('s2-viewport');
+const dotsEl   = document.getElementById('s2-dots');
+const bgEl     = document.getElementById('s2-bg');
+const labelEl  = document.getElementById('s2-label');
+const headingEl= document.getElementById('s2-heading');
+const descEl   = document.getElementById('s2-desc');
+const backBtn  = document.getElementById('s2-back');
+
+let cur=0, isAnim=false, autoTimer;
+
+/* build slides */
+const slideEls = SLIDES.map((s,i)=>{
+  const div=document.createElement('div');
+  div.className='s2-slide';
+  const img=document.createElement('img');
+  img.src=s.screen; img.alt=''; img.loading='lazy';
+  div.appendChild(img);
+  viewport.appendChild(div);
+  return div;
+});
+
+/* build dots */
+SLIDES.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='s2-dot';
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function applySlide(i, animate){
+  const s=SLIDES[i];
+  bgEl.style.backgroundColor=s.bg;
+  labelEl.textContent=s.label;
+  labelEl.style.color=s.textColor==='#fff'?'rgba(255,255,255,.55)':'rgba(27,22,20,.45)';
+  headingEl.textContent=s.heading.replace('\n',' ');
+  headingEl.innerHTML=s.heading.replace('\n','<br>');
+  headingEl.style.color=s.textColor;
+  descEl.textContent=s.desc;
+  descEl.style.color=s.textColor==='#fff'?'rgba(255,255,255,.7)':'rgba(27,22,20,.6)';
+  backBtn.style.color=s.textColor==='#fff'?'rgba(255,255,255,.4)':'rgba(27,22,20,.35)';
+  dotsEl.querySelectorAll('.s2-dot').forEach((d,j)=>{
+    d.className='s2-dot'+(s.textColor==='#fff'?'':' dark')+(j===i?' on':'');
+  });
+}
+
+function goTo(next){
+  if(isAnim||next===cur) return;
+  isAnim=true;
+  const prev=cur; cur=next;
+
+  /* next slide starts below, current exits up */
+  slideEls[next].style.transition='none';
+  slideEls[next].className='s2-slide';  // translateY(100%)
+  slideEls[next].offsetHeight;          // force reflow
+
+  slideEls[next].style.transition='';
+  slideEls[next].className='s2-slide current';
+  slideEls[prev].className='s2-slide exit';
+
+  applySlide(cur, true);
+
+  setTimeout(()=>{
+    slideEls[prev].className='s2-slide';
+    isAnim=false;
+  }, 750);
+}
+
+function nextSlide(){ goTo((cur+1)%SLIDES.length); }
+function startAuto(){ autoTimer=setInterval(nextSlide,3000); }
+function stopAuto(){  clearInterval(autoTimer); }
+
+function showSection2(){
+  cur=0;
+  slideEls.forEach((s,i)=>{ s.className='s2-slide'+(i===0?' current':''); });
+  applySlide(0, false);
+  document.getElementById('section2').classList.add('visible');
+  backBtn.classList.add('show');
+  startAuto();
+}
+function hideSection2(){
+  document.getElementById('section2').classList.remove('visible');
+  backBtn.classList.remove('show');
+  stopAuto();
+}
+
+window.addEventListener('wheel',e=>{
+  if(document.getElementById('section2').classList.contains('visible'))return;
+  if(document.getElementById('lightbox').classList.contains('show'))return;
+  if(e.deltaY>30) showSection2();
+},{passive:true});
+
+/* scroll up in section 2 → back to orbit */
+document.getElementById('section2').addEventListener('wheel',e=>{
+  if(e.deltaY < -30) hideSection2();
+},{passive:true});
+
+/* ── SECTION 3: Archive ── */
+const S3_FEATURED = [
+  { src:'../images/ui/ui-01.jpg', title:'首页', date:'2026', medium:'UI Design', dims:'iOS · Android' },
+  { src:'../images/ui/ui-02.jpg', title:'拍卖大厅', date:'2026', medium:'UI Design', dims:'iOS · Android' },
+  { src:'../images/ui/ui-03.jpg', title:'作品详情', date:'2026', medium:'UI Design', dims:'iOS · Android' },
+  { src:'../images/ui/ui-04.jpg', title:'出价界面', date:'2026', medium:'UI Design', dims:'iOS · Android' },
+  { src:'../images/ui/ui-05.jpg', title:'搜索页面', date:'2026', medium:'UI Design', dims:'iOS · Android' },
+];
+const S3_ARCHIVE = [
+  '../images/ui/ui-07.jpg','../images/ui/ui-08.jpg',
+  '../images/ui/ui-09.jpg','../images/ui/ui-010.jpg',
+  '../images/ui/ui-011.jpg','../images/ui/ui-012.jpg',
+  '../images/ui/ui-013.jpg','../images/ui/ui-014.jpg',
+  '../images/ui/ui-015.jpg','../images/ui/ui-016.jpg',
+  '../images/ui/ui-017.jpg','../images/ui/ui-018.jpg',
+  '../images/ui/ui-019.jpg','../images/ui/ui-020.jpg',
+  '../images/ui/ui-021.jpg','../images/ui/ui-022.jpg',
+  '../images/ui/ui-025.jpg','../images/ui/ui-026.jpg',
+  '../images/ui/ui-027.jpg','../images/ui/ui-028.jpg',
+  '../images/ui/ui-029.jpg','../images/ui/ui-030.jpg',
+  '../images/ui/ui-031.jpg','../images/ui/ui-032.jpg',
+  '../images/ui/ui-033.jpg','../images/ui/ui-034.jpg',
+  '../images/ui/ui-035.jpg','../images/ui/ui-036.jpg',
+  '../images/ui/ui-037.jpg','../images/ui/ui-038.jpg',
+];
+
+/* build featured */
+const featEl = document.getElementById('s3-featured');
+S3_FEATURED.forEach(item=>{
+  const div = document.createElement('div');
+  div.className = 's3-feat-item';
+  div.innerHTML = `
+    <div class="s3-feat-img"><img src="${item.src}" loading="lazy" alt="${item.title}"/></div>
+    <div class="s3-feat-meta">
+      <span class="s3-meta-key">Title</span><span class="s3-meta-val">${item.title}</span>
+      <span class="s3-meta-key">Date</span><span class="s3-meta-val">${item.date}</span>
+      <span class="s3-meta-key">Medium</span><span class="s3-meta-val">${item.medium}</span>
+      <span class="s3-meta-key">Platform</span><span class="s3-meta-val">${item.dims}</span>
+    </div>`;
+  featEl.appendChild(div);
+});
+
+/* build archive grid */
+const gridEl = document.getElementById('s3-grid');
+S3_ARCHIVE.forEach((src,i)=>{
+  const item = document.createElement('div');
+  item.className = 's3-grid-item';
+  item.innerHTML = `<div class="s3-grid-img"><img src="${src}" loading="lazy" alt=""/></div>`;
+  gridEl.appendChild(item);
+});
+
+/* switch Featured / Archive */
+function switchView(view){
+  document.getElementById('s3-featured').style.display = view==='featured'?'block':'none';
+  document.getElementById('s3-archive').style.display  = view==='archive' ?'block':'none';
+  document.querySelectorAll('.s3-nav-item').forEach(a=>{
+    const txt = a.textContent.trim().replace('•','').trim();
+    const isFeat = txt === 'Featured';
+    const isArch = txt === 'Archive';
+    if(view==='featured'){
+      a.classList.toggle('active', isFeat);
+      if(isFeat) a.innerHTML = 'Featured <span class="s3-dot">•</span>';
+      if(isArch) a.innerHTML = 'Archive';
+    } else {
+      a.classList.toggle('active', isArch);
+      if(isFeat) a.innerHTML = 'Featured';
+      if(isArch) a.innerHTML = 'Archive <span class="s3-dot">•</span>';
+    }
+  });
+  document.getElementById('s3-content').scrollTop = 0;
+}
+
+/* show / hide section 3 */
+function showSection3(){
+  document.getElementById('section3').classList.add('visible');
+  switchView('archive');
+}
+function hideSection3(){
+  document.getElementById('section3').classList.remove('visible');
+}
+
+/* BROWSE SCREENS link triggers section 3 */
+const browseBtn = document.querySelector('.center-cta');
+if(browseBtn){
+  browseBtn.addEventListener('click', e=>{
+    e.preventDefault();
+    showSection3();
+  });
+}
+
+/* scroll down in section2 → show section3 */
+document.getElementById('section2').addEventListener('wheel',e=>{
+  if(e.deltaY > 30) showSection3();
+},{passive:true});
+
+/* scroll up in section3 → back to section2 */
+document.getElementById('section3').addEventListener('wheel',e=>{
+  if(e.deltaY < -30){
+    const content = document.getElementById('s3-content');
+    if(content.scrollTop === 0) hideSection3();
+  }
+},{passive:true});
+</script>
+</body>
+</html>

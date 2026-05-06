@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>艺是网拍 — LILLY</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+a,button{outline:none;-webkit-tap-highlight-color:transparent;}
+
+:root{
+  --paper:#F4EFE6;
+  --ink:#1B1614;
+  --ink-soft:#3A2F2C;
+  --warm:#9C8E87;
+  --terracotta:#C5563B;
+  --rule:rgba(27,22,20,.1);
+}
+
+html,body{
+  width:100%;height:100%;
+  background:var(--paper);
+  color:var(--ink-soft);
+  font-family:'Raleway',sans-serif;
+  font-weight:200;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+
+/* ── HEADER ── */
+#header{
+  flex-shrink:0;
+  display:flex;align-items:stretch;
+  border-bottom:1px solid var(--rule);
+  background:var(--paper);
+  z-index:10;
+}
+
+#back{
+  display:flex;align-items:center;gap:.55rem;
+  padding:0 2rem;
+  font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(27,22,20,.35);text-decoration:none;
+  border-right:1px solid var(--rule);
+  flex-shrink:0;
+  transition:color .25s;
+}
+#back:hover{color:var(--terracotta)}
+#back svg{fill:none;stroke:currentColor;stroke-width:1.2}
+
+#info{
+  flex:1;display:flex;align-items:center;
+  overflow:hidden;
+}
+.info-block{
+  padding:1.1rem 2rem;
+  border-right:1px solid rgba(27,22,20,.06);
+  flex-shrink:0;
+}
+.info-block:last-child{border-right:none}
+.info-label{
+  font-size:.48rem;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--warm);display:block;margin-bottom:.3rem;
+}
+.info-val{
+  font-size:.72rem;letter-spacing:.06em;color:var(--ink-soft);display:block;
+}
+.info-val.serif{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.95rem;font-weight:300;font-style:italic;color:var(--ink);
+}
+
+/* ── SCROLL CONTENT ── */
+#content{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+#content::-webkit-scrollbar{width:3px}
+#content::-webkit-scrollbar-track{background:transparent}
+#content::-webkit-scrollbar-thumb{background:rgba(27,22,20,.15);border-radius:2px}
+
+/* hero — full width */
+.brand-hero{
+  width:100%;
+  overflow:hidden;
+  background:#E4DBC8;
+}
+.brand-hero img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+
+/* hero — full width, no crop */
+.brand-hero{
+  width:100%;
+  background:#E4DBC8;
+  line-height:0;
+}
+.brand-hero img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:unset;
+}
+
+/* image grid section */
+.brand-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:2px;
+  background:#E8E0D4;
+}
+.brand-grid-item{
+  background:#E4DBC8;
+  line-height:0;
+}
+.brand-grid-item.wide{
+  grid-column:span 2;
+}
+.brand-grid-item img{
+  width:100%;
+  height:auto;
+  display:block;
+  object-fit:unset;
+  transition:opacity .4s ease;
+}
+.brand-grid-item:hover img{opacity:.92}
+
+/* text section */
+.brand-text{
+  padding:4rem 8vw;
+  max-width:900px;
+  border-bottom:1px solid var(--rule);
+}
+.brand-text-label{
+  font-size:.52rem;letter-spacing:.38em;text-transform:uppercase;
+  color:var(--terracotta);display:block;margin-bottom:1.4rem;
+}
+.brand-text-body{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(1.1rem,2vw,1.5rem);
+  font-weight:300;line-height:1.8;
+  color:var(--ink-soft);
+}
+
+/* footer nav */
+.brand-footer{
+  padding:2rem 8vw;
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--rule);
+}
+.brand-footer-label{
+  font-size:.52rem;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--warm);
+}
+
+/* reveal on scroll */
+.reveal{
+  opacity:0;transform:translateY(20px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.reveal.on{opacity:1;transform:translateY(0)}
+
+/* mobile */
+@media(max-width:768px){
+  .brand-grid{grid-template-columns:1fr}
+  .brand-grid.cols-3{grid-template-columns:1fr}
+  .brand-grid-item.wide,.brand-grid-item.wide.col3{grid-column:span 1;aspect-ratio:4/3}
+  .brand-text{padding:3rem 6vw}
+  #info{flex-wrap:wrap}
+  .info-block{padding:.8rem 1.2rem}
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <a id="back" href="#" onclick="history.back();return false;">
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M7 1L2 5l5 4M2 5h10"/>
+    </svg>
+    Back
+  </a>
+  <div id="info">
+    <div class="info-block">
+      <span class="info-label">Project</span>
+      <span class="info-val serif">艺是网拍 — 艺术品在线交易平台</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Year</span>
+      <span class="info-val">2017 — 2024</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Category</span>
+      <span class="info-val">Brand Identity · Visual System</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Scope</span>
+      <span class="info-val">Logo · Color · Typography · Print</span>
+    </div>
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- Hero -->
+  <div class="brand-hero reveal">
+    <img src="../images/brand-main.jpg" alt="艺是网拍 Brand Identity"/>
+  </div>
+
+  <!-- Text intro -->
+  <div class="brand-text reveal">
+    <span class="brand-text-label">Overview</span>
+    <p class="brand-text-body">为艺是网拍构建从0到1的完整品牌视觉体系，历经七年持续迭代。以东方审美为底层逻辑，将传统书画的笔墨意蕴转译为当代数字平台的视觉语言。</p>
+  </div>
+
+  <!-- Grid: 1.jpg 全宽 + 2.jpg 3.jpg 并排 -->
+  <div class="brand-grid reveal">
+    <div class="brand-grid-item wide">
+      <img src="../images/1.jpg" alt="" loading="lazy"/>
+    </div>
+    <div class="brand-grid-item">
+      <img src="../images/2.jpg" alt="" loading="lazy"/>
+    </div>
+    <div class="brand-grid-item">
+      <img src="../images/3.jpg" alt="" loading="lazy"/>
+    </div>
+  </div>
+
+  <!-- Full-width 4 -->
+  <div class="brand-hero reveal">
+    <img src="../images/4.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 5 -->
+  <div class="brand-hero reveal">
+    <img src="../images/5.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 6 -->
+  <div class="brand-hero reveal">
+    <img src="../images/6.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 7 -->
+  <div class="brand-hero reveal">
+    <img src="../images/7.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 8 -->
+  <div class="brand-hero reveal">
+    <img src="../images/8.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 9 -->
+  <div class="brand-hero reveal">
+    <img src="../images/9.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 10 -->
+  <div class="brand-hero reveal">
+    <img src="../images/10.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 11 -->
+  <div class="brand-hero reveal">
+    <img src="../images/11.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Full-width 12 -->
+  <div class="brand-hero reveal">
+    <img src="../images/12.jpg" alt="" loading="lazy"/>
+  </div>
+
+  <!-- Footer -->
+  <div class="brand-footer">
+    <span class="brand-footer-label">艺是网拍 · 2017—2024</span>
+    <span class="brand-footer-label">Brand Identity · Visual System</span>
+  </div>
+
+</div>
+
+<script>
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('on'); obs.unobserve(e.target); }
+  });
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

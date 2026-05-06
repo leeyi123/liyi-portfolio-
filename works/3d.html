@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>归雁入胡天 — LILLY</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+a,button{outline:none;-webkit-tap-highlight-color:transparent;}
+
+:root{
+  --cream:#f0ebe0;
+  --warm:#d4c9b0;
+  --gold:#c4963c;
+  --ink:#0c0a07;
+  --paper:#F4EFE6;
+  --ink-soft:#3A2F2C;
+  --terracotta:#C5563B;
+}
+
+html,body{
+  width:100%;height:100%;
+  margin:0;padding:0;
+  background:var(--paper);
+  color:var(--ink-soft);
+  font-family:'Raleway',sans-serif;
+  font-weight:200;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── HEADER ── */
+#header{
+  flex-shrink:0;
+  display:flex;
+  align-items:stretch;
+  border-bottom:1px solid rgba(27,22,20,.1);
+  background:var(--paper);
+  z-index:10;
+}
+
+/* back */
+#back{
+  display:flex;align-items:center;gap:.55rem;
+  padding:0 2rem;
+  font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(27,22,20,.35);text-decoration:none;
+  border-right:1px solid rgba(27,22,20,.1);
+  transition:color .25s;
+  flex-shrink:0;
+}
+#back:hover{color:var(--terracotta)}
+#back svg{fill:none;stroke:currentColor;stroke-width:1.2}
+
+/* info strip */
+#info{
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:0;
+  overflow:hidden;
+}
+.info-block{
+  padding:1.1rem 2rem;
+  border-right:1px solid rgba(27,22,20,.08);
+  flex-shrink:0;
+}
+.info-block:last-child{border-right:none;}
+.info-label{
+  font-size:.48rem;letter-spacing:.34em;text-transform:uppercase;
+  color:rgba(27,22,20,.38);display:block;margin-bottom:.3rem;
+}
+.info-val{
+  font-size:.72rem;letter-spacing:.06em;
+  color:var(--ink-soft);display:block;
+}
+.info-val.serif{
+  font-family:'Cormorant Garamond',serif;
+  font-size:.95rem;font-weight:300;font-style:italic;
+  color:#1B1614;
+}
+
+/* award badge */
+.award-badge{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.22rem .65rem;
+  border:1px solid rgba(197,86,59,.4);
+  font-size:.52rem;letter-spacing:.18em;
+  color:var(--terracotta);
+  margin-top:.25rem;
+}
+
+/* ── IFRAME ── */
+#embed{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+}
+#embed iframe{
+  width:100%;height:100%;
+  border:none;display:block;
+}
+
+/* loading state */
+#loading{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:var(--paper);
+  gap:1rem;
+  transition:opacity .6s ease;
+  pointer-events:none;
+}
+#loading.hidden{opacity:0;}
+.loading-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--terracotta);opacity:.4;
+  animation:pulse 1.4s ease-in-out infinite;
+}
+.loading-dot:nth-child(2){animation-delay:.2s;}
+.loading-dot:nth-child(3){animation-delay:.4s;}
+.loading-dots{display:flex;gap:.4rem;}
+.loading-text{
+  font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;
+  color:rgba(27,22,20,.3);
+}
+@keyframes pulse{
+  0%,100%{opacity:.2;transform:scale(1);}
+  50%{opacity:.8;transform:scale(1.3);}
+}
+
+/* mobile */
+@media(max-width:768px){
+  #info{flex-wrap:wrap;}
+  .info-block{padding:.8rem 1.2rem;}
+  .info-val.serif{font-size:.82rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <a id="back" href="#" onclick="history.back();return false;">
+    <svg width="12" height="10" viewBox="0 0 12 10">
+      <path d="M7 1L2 5l5 4M2 5h10"/>
+    </svg>
+    Back
+  </a>
+  <div id="info">
+    <div class="info-block">
+      <span class="info-label">Project</span>
+      <span class="info-val serif">归雁入胡天 — 王维与盛唐丝绸之路</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Award</span>
+      <span class="info-val">
+        <span class="award-badge">🥈 银奖</span>
+      </span>
+      <span class="info-val" style="margin-top:.3rem;font-size:.65rem;color:rgba(27,22,20,.5);">SROM盛唐丝绸之路数字博物馆云上策展大赛</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Year</span>
+      <span class="info-val">2024</span>
+    </div>
+    <div class="info-block">
+      <span class="info-label">Category</span>
+      <span class="info-val">3D Digital Exhibition</span>
+    </div>
+  </div>
+</div>
+
+<div id="embed">
+  <div id="loading">
+    <div class="loading-dots">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
+    <p class="loading-text">Loading Exhibition</p>
+  </div>
+  <iframe
+    src="https://www.kujiale.com/cloud/design/3FO3Q9XQFVUB/show"
+    allowfullscreen
+    allow="xr-spatial-tracking; gyroscope; accelerometer"
+    onload="document.getElementById('loading').classList.add('hidden')"
+  ></iframe>
+</div>
+
+</body>
+</html>
