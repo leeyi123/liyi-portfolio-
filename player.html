@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>LILLY — Player</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet"/>
+<script src="https://player.vimeo.com/api/player.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 a,button{outline:none;-webkit-tap-highlight-color:transparent;}
@@ -26,12 +27,30 @@ html,body{
 /* ── VIDEO ── */
 #video-wrap{
   position:fixed;inset:0;
+  cursor:pointer;
 }
 #vid{
   width:100%;height:100%;
   object-fit:cover;
   display:block;
   cursor:pointer;
+}
+#vimeo-player{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+#vimeo-player iframe{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:100vw;
+  height:56.25vw;
+  min-width:177.78vh;
+  min-height:100vh;
+  transform:translate(-50%,-50%);
+  border:0;
+  pointer-events:none;
 }
 #vid.poster-only{
   background-position:center;
@@ -368,6 +387,7 @@ const PROJECTS = [
   {
     num:"01", title:"张恩利", subtitle:"仓库 I II",
     image:"images/1.jpg",
+    vimeoId:"1189575682",
     meta:[
       {l:"Year",  v:"2025SS"},
       {l:"Client",v:"西泠拍卖"},
@@ -378,6 +398,7 @@ const PROJECTS = [
   {
     num:"02", title:"冰上鸿飞", subtitle:"2025杭州艺术季开幕片",
     image:"images/2.jpg",
+    vimeoId:"1189581990",
     meta:[
       {l:"Year",  v:"2025AW"},
       {l:"Client",v:"西泠拍卖"},
@@ -388,6 +409,7 @@ const PROJECTS = [
   {
     num:"03", title:"外公的礼物", subtitle:"黄宾虹诞辰一百六十周年纪念短片",
     image:"images/3.jpg",
+    vimeoId:"1189579603",
     meta:[
       {l:"Year",v:"2025AW"},
       {l:"Role",v:"Art Director, Film Producer"}
@@ -396,6 +418,7 @@ const PROJECTS = [
   {
     num:"04", title:"西泠拍卖二十周年纪念片", subtitle:"历史是为了创造未来而存在的",
     image:"images/4.jpg",
+    vimeoId:"1189580456",
     meta:[
       {l:"Year",v:"2024"},
       {l:"Role",v:"Production Designer"}
@@ -421,6 +444,11 @@ const PROJECTS = [
 
 const p = PROJECTS[idx] || PROJECTS[0];
 const vid = document.getElementById('vid');
+const videoWrap = document.getElementById('video-wrap');
+let vimeoPlayer = null;
+let vimeoDuration = 0;
+let vimeoCurrent = 0;
+let vimeoPaused = true;
 
 /* populate title */
 document.getElementById('t-num').textContent = p.num;
@@ -438,8 +466,55 @@ document.getElementById('meta-rows').innerHTML = p.meta.map(m=>`
     <span class="meta-val">${m.v}</span>
   </div>`).join('');
 
-/* load video or deployment poster */
-if(p.video){
+/* load video, Vimeo, or deployment poster */
+if(p.vimeoId && window.Vimeo){
+  vid.remove();
+  const mount = document.createElement('div');
+  mount.id = 'vimeo-player';
+  videoWrap.appendChild(mount);
+
+  vimeoPlayer = new Vimeo.Player(mount, {
+    id: p.vimeoId,
+    autopause: false,
+    controls: false,
+    muted: false,
+    playsinline: true,
+    responsive: false,
+    title: false,
+    byline: false,
+    portrait: false,
+    width: 1920
+  });
+
+  vimeoPlayer.ready().then(()=>{
+    const iframe = mount.querySelector('iframe');
+    if(iframe) iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture');
+    return vimeoPlayer.getDuration();
+  }).then(duration=>{
+    vimeoDuration = duration || 0;
+    document.getElementById('time-dur').textContent = fmt(vimeoDuration);
+  }).catch(()=>{});
+
+  vimeoPlayer.on('play', ()=>{
+    vimeoPaused = false;
+    updatePlayPauseBtn();
+  });
+  vimeoPlayer.on('pause', ()=>{
+    vimeoPaused = true;
+    updatePlayPauseBtn();
+  });
+  vimeoPlayer.on('timeupdate', data=>{
+    vimeoCurrent = data.seconds || 0;
+    vimeoDuration = data.duration || vimeoDuration;
+    if(vimeoDuration){
+      const pct = (vimeoCurrent / vimeoDuration)*100;
+      document.getElementById('progress-fill').style.width = pct+'%';
+      document.getElementById('time-cur').textContent = fmt(vimeoCurrent);
+      document.getElementById('time-dur').textContent = fmt(vimeoDuration);
+    }
+  });
+  vimeoPlayer.on('ended', showEndCard);
+}else if(p.video){
   vid.src = p.video;
   vid.load();
 }else{
@@ -453,7 +528,11 @@ if(p.video){
 let dragging = false;
 
 function startPlay(){
-  vid.play();
+  if(vimeoPlayer){
+    vimeoPlayer.play();
+  }else{
+    vid.play();
+  }
   document.getElementById('play-btn').classList.add('hide');
   document.getElementById('title-block').classList.add('hide');
   document.getElementById('progress-wrap').classList.add('show');
@@ -461,15 +540,24 @@ function startPlay(){
 }
 
 function togglePlay(){
-  if(vid.paused){ vid.play(); } else { vid.pause(); }
+  if(vimeoPlayer){
+    if(vimeoPaused){ vimeoPlayer.play(); } else { vimeoPlayer.pause(); }
+  }else{
+    if(vid.paused){ vid.play(); } else { vid.pause(); }
+  }
 }
 
 function skip(sec){
-  vid.currentTime = Math.max(0, Math.min(vid.duration, vid.currentTime + sec));
+  if(vimeoPlayer){
+    const next = Math.max(0, Math.min(vimeoDuration || 0, vimeoCurrent + sec));
+    vimeoPlayer.setCurrentTime(next);
+  }else{
+    vid.currentTime = Math.max(0, Math.min(vid.duration, vid.currentTime + sec));
+  }
 }
 
 function updatePlayPauseBtn(){
-  const paused = vid.paused;
+  const paused = vimeoPlayer ? vimeoPaused : vid.paused;
   document.getElementById('play-icon').style.display  = paused ? 'block' : 'none';
   document.getElementById('pause-icon').style.display = paused ? 'none'  : 'block';
   document.getElementById('pp-label').textContent     = paused ? 'Play'  : 'Pause';
@@ -478,8 +566,12 @@ function updatePlayPauseBtn(){
 function replay(){
   document.getElementById('end-card').classList.remove('show');
   document.getElementById('scrim').classList.remove('dark');
-  vid.currentTime = 0;
-  vid.play();
+  if(vimeoPlayer){
+    vimeoPlayer.setCurrentTime(0).then(()=>vimeoPlayer.play());
+  }else{
+    vid.currentTime = 0;
+    vid.play();
+  }
   document.getElementById('progress-wrap').classList.add('show');
 }
 
@@ -494,12 +586,14 @@ function posToTime(e){
   const track = document.getElementById('progress-track');
   const rect = track.getBoundingClientRect();
   const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  return ratio * (vid.duration || 0);
+  return ratio * (vimeoPlayer ? vimeoDuration : (vid.duration || 0));
 }
 
 function seekClick(e){
   if(dragging) return;
-  vid.currentTime = posToTime(e);
+  const t = posToTime(e);
+  if(vimeoPlayer){ vimeoPlayer.setCurrentTime(t); }
+  else{ vid.currentTime = t; }
 }
 
 function hoverTrack(e){
@@ -514,16 +608,20 @@ function hoverTrack(e){
 
 function startDrag(e){
   dragging = true;
-  vid.currentTime = posToTime(e);
-  const onMove = ev => { if(dragging) vid.currentTime = posToTime(ev); };
+  const setTime = t => {
+    if(vimeoPlayer){ vimeoPlayer.setCurrentTime(t); }
+    else{ vid.currentTime = t; }
+  };
+  setTime(posToTime(e));
+  const onMove = ev => { if(dragging) setTime(posToTime(ev)); };
   const onUp   = ()  => { dragging = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
 }
 
 /* click video to pause/resume */
-vid.addEventListener('click', ()=>{
-  if(vid.ended) return;
+videoWrap.addEventListener('click', ()=>{
+  if(!vimeoPlayer && vid.ended) return;
   togglePlay();
 });
 
@@ -541,11 +639,13 @@ vid.addEventListener('loadedmetadata', ()=>{
   document.getElementById('time-dur').textContent = fmt(vid.duration);
 });
 
-vid.addEventListener('ended', ()=>{
+function showEndCard(){
   document.getElementById('progress-wrap').classList.remove('show');
   document.getElementById('scrim').classList.add('dark');
   setTimeout(()=>{ document.getElementById('end-card').classList.add('show'); }, 800);
-});
+}
+
+vid.addEventListener('ended', showEndCard);
 
 /* keyboard shortcuts */
 document.addEventListener('keydown', e=>{
